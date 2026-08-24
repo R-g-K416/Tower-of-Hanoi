@@ -1,0 +1,2858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tower of Hanoi</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    min-height:100vh;
+    font-family:Arial,Helvetica,sans-serif;
+    color:white;
+
+    background:
+        radial-gradient(circle at 12% 8%,rgba(117,103,255,.25),transparent 30%),
+        radial-gradient(circle at 88% 12%,rgba(22,220,255,.14),transparent 30%),
+        radial-gradient(circle at 50% 100%,rgba(255,92,145,.08),transparent 35%),
+        linear-gradient(135deg,#071127,#0d1836,#08122b);
+
+    overflow-x:hidden;
+}
+
+button,
+select{
+    font-family:inherit;
+}
+
+.screen{
+    display:none;
+    min-height:100vh;
+}
+
+.screen.active{
+    display:block;
+}
+
+
+/* =====================================================
+   NEW GAME
+===================================================== */
+
+#newGameScreen{
+    min-height:100vh;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+}
+
+#newGameScreen.active{
+    display:flex;
+}
+
+.new-box{
+    width:min(620px,95%);
+
+    padding:34px 30px;
+
+    text-align:center;
+
+    border-radius:28px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(28,40,79,.97),
+            rgba(10,18,42,.97)
+        );
+
+    border:1px solid rgba(255,255,255,.11);
+
+    box-shadow:
+        0 28px 90px rgba(0,0,0,.42);
+
+    animation:newBoxIn .65s ease;
+}
+
+@keyframes newBoxIn{
+
+    from{
+        opacity:0;
+        transform:translateY(25px) scale(.96);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0) scale(1);
+    }
+
+}
+
+.new-box h1{
+
+    font-size:clamp(38px,7vw,62px);
+
+    line-height:1;
+
+    margin-bottom:22px;
+
+    letter-spacing:-2px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #8e80ff,
+            #17ddff
+        );
+
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+
+/* =====================================================
+   DISK SELECT
+===================================================== */
+
+.disk-select{
+    text-align:left;
+    margin-bottom:14px;
+}
+
+.disk-select label{
+
+    display:block;
+
+    margin-bottom:7px;
+
+    color:#d6def3;
+
+    font-size:13px;
+
+    font-weight:bold;
+}
+
+select{
+
+    width:100%;
+
+    padding:13px 14px;
+
+    border-radius:12px;
+
+    border:1px solid rgba(255,255,255,.11);
+
+    background:#182547;
+
+    color:white;
+
+    font-size:15px;
+
+    outline:none;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+select:hover,
+select:focus{
+
+    border-color:#7567ff;
+
+    box-shadow:
+        0 0 0 3px rgba(117,103,255,.12);
+}
+
+
+/* =====================================================
+   START BUTTON
+===================================================== */
+
+.start-btn{
+
+    width:100%;
+
+    padding:15px;
+
+    border:none;
+
+    border-radius:13px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #7567ff,
+            #5148dc
+        );
+
+    color:white;
+
+    font-size:16px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    box-shadow:
+        0 12px 28px rgba(85,74,230,.28);
+
+    transition:.25s;
+}
+
+.start-btn:hover{
+
+    transform:translateY(-3px);
+
+    filter:brightness(1.10);
+
+    box-shadow:
+        0 17px 35px rgba(85,74,230,.40);
+}
+
+.start-btn:active{
+    transform:scale(.98);
+}
+
+
+/* =====================================================
+   DESCRIPTION
+===================================================== */
+
+.description{
+
+    margin-top:18px;
+
+    color:#aeb9d6;
+
+    font-size:14px;
+
+    line-height:1.65;
+}
+
+
+/* =====================================================
+   FEATURES
+===================================================== */
+
+.features{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:9px;
+
+    margin-top:22px;
+}
+
+.feature{
+
+    min-height:74px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:6px;
+
+    border-radius:14px;
+
+    background:
+        rgba(255,255,255,.045);
+
+    border:
+        1px solid rgba(255,255,255,.08);
+
+    transition:.25s;
+}
+
+.feature:hover{
+
+    transform:translateY(-4px);
+
+    background:
+        rgba(255,255,255,.075);
+
+    border-color:
+        rgba(117,103,255,.28);
+}
+
+.feature-icon{
+    font-size:22px;
+}
+
+.feature-text{
+
+    color:#aeb9d6;
+
+    font-size:9px;
+
+    font-weight:bold;
+
+    letter-spacing:.7px;
+
+    text-transform:uppercase;
+}
+
+
+/* =====================================================
+   GAME
+===================================================== */
+
+#gameScreen{
+
+    min-height:100vh;
+
+    padding:
+        18px
+        18px
+        30px;
+
+    position:relative;
+}
+
+
+/* =====================================================
+   TOP AREA
+===================================================== */
+
+.game-top{
+
+    width:min(1200px,100%);
+
+    margin:0 auto;
+
+    display:grid;
+
+    grid-template-columns:
+        140px
+        1fr
+        140px;
+
+    align-items:start;
+
+    min-height:74px;
+
+    position:relative;
+
+    z-index:20;
+}
+
+
+/* =====================================================
+   LEFT CONTROLS
+===================================================== */
+
+.controls{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:6px;
+}
+
+.controls button{
+
+    width:92px;
+
+    height:31px;
+
+    border:none;
+
+    border-radius:8px;
+
+    color:white;
+
+    font-size:9px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.controls button:hover{
+
+    transform:translateY(-2px);
+
+    filter:brightness(1.12);
+}
+
+.new-game-btn{
+
+    background:
+        linear-gradient(
+            135deg,
+            #7567ff,
+            #5148dc
+        );
+}
+
+.reset-btn{
+
+    background:
+        linear-gradient(
+            135deg,
+            #ff4d6d,
+            #d9284d
+        );
+}
+
+
+/* =====================================================
+   RIGHT STATS
+===================================================== */
+
+.stats{
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:flex-end;
+
+    gap:6px;
+}
+
+.stat{
+
+    width:104px;
+
+    height:31px;
+
+    padding:0 8px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    border-radius:8px;
+
+    border:
+        1px solid rgba(255,255,255,.11);
+
+    box-shadow:
+        0 5px 14px rgba(0,0,0,.18);
+
+    backdrop-filter:blur(8px);
+
+    transition:.22s;
+}
+
+.stat:hover{
+    transform:translateX(-3px);
+}
+
+.stat:nth-child(1){
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(0,195,255,.20),
+            rgba(0,105,255,.07)
+        );
+}
+
+.stat:nth-child(2){
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,75,125,.20),
+            rgba(255,35,70,.07)
+        );
+}
+
+.stat:nth-child(3){
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,190,55,.20),
+            rgba(255,125,0,.07)
+        );
+}
+
+.stat:nth-child(4){
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(55,225,145,.20),
+            rgba(15,165,90,.07)
+        );
+}
+
+.stat span{
+
+    color:#d4ddf0;
+
+    font-size:6px;
+
+    font-weight:bold;
+
+    letter-spacing:.5px;
+}
+
+.stat strong{
+
+    color:white;
+
+    font-size:10px;
+
+    font-weight:bold;
+
+    font-variant-numeric:tabular-nums;
+}
+
+
+/* =====================================================
+   VERTICAL PROGRESS
+===================================================== */
+
+.vertical-progress{
+
+    position:absolute;
+
+    left:12px;
+
+    top:125px;
+
+    height:220px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    gap:7px;
+
+    pointer-events:none;
+
+    z-index:5;
+}
+
+.vertical-progress-bar{
+
+    position:relative;
+
+    width:8px;
+
+    height:185px;
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+    background:#172443;
+
+    border:
+        1px solid rgba(255,255,255,.08);
+
+    box-shadow:
+        inset 0 0 8px rgba(0,0,0,.28);
+}
+
+.vertical-progress-fill{
+
+    position:absolute;
+
+    left:0;
+
+    bottom:0;
+
+    width:100%;
+
+    height:0%;
+
+    border-radius:20px;
+
+    background:
+        linear-gradient(
+            to top,
+            #7567ff,
+            #16ddff
+        );
+
+    box-shadow:
+        0 0 15px rgba(22,221,255,.58);
+
+    transition:
+        height .45s ease;
+}
+
+.vertical-progress span{
+
+    color:#aeb9d6;
+
+    font-size:8px;
+
+    font-weight:bold;
+}
+
+
+/* =====================================================
+   MESSAGE
+===================================================== */
+
+.message{
+
+    width:min(700px,70%);
+
+    min-height:25px;
+
+    margin:
+        8px auto
+        10px;
+
+    color:#cbd5ec;
+
+    text-align:center;
+
+    font-size:13px;
+
+    position:relative;
+
+    z-index:5;
+
+    transition:.2s;
+}
+
+
+/* =====================================================
+   GAME AREA
+===================================================== */
+
+.game{
+
+    width:min(
+        980px,
+        calc(100% - 180px)
+    );
+
+    margin:0 auto;
+
+    display:flex;
+
+    align-items:flex-end;
+
+    justify-content:center;
+
+    gap:34px;
+
+    padding:
+        5px
+        10px
+        36px;
+
+    position:relative;
+}
+
+
+/* =====================================================
+   TOWER
+===================================================== */
+
+.tower{
+
+    position:relative;
+
+    width:30%;
+
+    height:390px;
+
+    flex:0 0 30%;
+
+    border-radius:21px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.035),
+            rgba(255,255,255,.012)
+        );
+
+    border:
+        1px solid rgba(255,255,255,.08);
+
+    cursor:pointer;
+
+    overflow:hidden;
+
+    transition:
+        transform .25s,
+        border-color .25s,
+        box-shadow .25s;
+}
+
+.tower:hover{
+
+    transform:translateY(-4px);
+
+    border-color:
+        rgba(117,103,255,.45);
+
+    box-shadow:
+        0 12px 32px rgba(0,0,0,.18);
+}
+
+.tower.selected{
+
+    border-color:#16dcff;
+
+    box-shadow:
+        0 0 30px
+        rgba(22,220,255,.18);
+}
+
+
+/* =====================================================
+   TOWER NAME
+===================================================== */
+
+.tower-name{
+
+    position:absolute;
+
+    top:13px;
+
+    left:0;
+
+    width:100%;
+
+    text-align:center;
+
+    color:#aeb9d6;
+
+    font-size:11px;
+
+    font-weight:bold;
+
+    letter-spacing:1px;
+}
+
+
+/* =====================================================
+   POLE
+===================================================== */
+
+.pole{
+
+    position:absolute;
+
+    left:50%;
+
+    bottom:44px;
+
+    transform:translateX(-50%);
+
+    width:9px;
+
+    height:284px;
+
+    border-radius:10px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #59627d,
+            #eef2ff 50%,
+            #59627d
+        );
+
+    box-shadow:
+        0 0 12px rgba(255,255,255,.08);
+}
+
+
+/* =====================================================
+   BASE
+===================================================== */
+
+.base{
+
+    position:absolute;
+
+    left:50%;
+
+    bottom:25px;
+
+    transform:translateX(-50%);
+
+    width:88%;
+
+    max-width:290px;
+
+    height:20px;
+
+    border-radius:12px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #444d6c,
+            #c4cbdf 50%,
+            #444d6c
+        );
+
+    box-shadow:
+        0 6px 15px rgba(0,0,0,.35);
+
+    z-index:4;
+}
+
+
+/* =====================================================
+   DISKS
+===================================================== */
+
+.disks{
+
+    position:absolute;
+
+    left:50%;
+
+    bottom:45px;
+
+    transform:translateX(-50%);
+
+    width:100%;
+
+    height:285px;
+
+    display:flex;
+
+    flex-direction:column-reverse;
+
+    align-items:center;
+
+    justify-content:flex-start;
+
+    overflow:visible;
+
+    z-index:3;
+
+    pointer-events:none;
+}
+
+.disk{
+
+    flex:0 0 auto;
+
+    height:27px;
+
+    margin:0;
+
+    border-radius:9px;
+
+    border:
+        2px solid rgba(255,255,255,.25);
+
+    box-shadow:
+        0 4px 9px rgba(0,0,0,.28);
+
+    transition:
+        transform .25s ease,
+        box-shadow .25s ease;
+
+    transform-origin:center;
+}
+
+
+/* =====================================================
+   COLORS
+===================================================== */
+
+.disk[data-size="1"]{
+    background:linear-gradient(90deg,#00f2fe,#4facfe);
+}
+
+.disk[data-size="2"]{
+    background:linear-gradient(90deg,#ff0844,#ffb199);
+}
+
+.disk[data-size="3"]{
+    background:linear-gradient(90deg,#f9d423,#ff4e50);
+}
+
+.disk[data-size="4"]{
+    background:linear-gradient(90deg,#43e97b,#38f9d7);
+}
+
+.disk[data-size="5"]{
+    background:linear-gradient(90deg,#30cfd0,#330867);
+}
+
+.disk[data-size="6"]{
+    background:linear-gradient(90deg,#667eea,#764ba2);
+}
+
+.disk[data-size="7"]{
+    background:linear-gradient(90deg,#a18cd1,#fbc2eb);
+}
+
+.disk[data-size="8"]{
+    background:linear-gradient(90deg,#00c6ff,#0072ff);
+}
+
+.disk[data-size="9"]{
+    background:linear-gradient(90deg,#f953c6,#b91d73);
+}
+
+.disk[data-size="10"]{
+    background:linear-gradient(90deg,#ee0979,#ff6a00);
+}
+
+
+/* =====================================================
+   SELECTED DISK
+===================================================== */
+
+.disk.selected{
+
+    transform:
+        translateY(-12px)
+        scale(1.05);
+
+    box-shadow:
+        0 0 22px
+        rgba(0,212,255,.88);
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+footer{
+
+    text-align:center;
+
+    color:#687594;
+
+    font-size:11px;
+
+    padding:
+        0 20px
+        25px;
+}
+
+
+/* =====================================================
+   WIN
+===================================================== */
+
+.overlay{
+
+    position:fixed;
+
+    inset:0;
+
+    display:none;
+
+    align-items:center;
+
+    justify-content:center;
+
+    z-index:100;
+
+    background:
+        rgba(3,5,15,.84);
+
+    backdrop-filter:blur(13px);
+}
+
+.overlay.show{
+
+    display:flex;
+
+    animation:
+        overlayIn .35s ease;
+}
+
+@keyframes overlayIn{
+
+    from{
+        opacity:0;
+    }
+
+    to{
+        opacity:1;
+    }
+
+}
+
+.win-box{
+
+    width:min(440px,92%);
+
+    padding:38px 25px;
+
+    text-align:center;
+
+    border-radius:25px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #1d2a52,
+            #101936
+        );
+
+    border:
+        1px solid rgba(255,255,255,.13);
+
+    box-shadow:
+        0 30px 100px rgba(0,0,0,.55);
+
+    animation:
+        winIn .6s
+        cubic-bezier(.17,.67,.35,1.4);
+}
+
+@keyframes winIn{
+
+    from{
+        opacity:0;
+        transform:
+            scale(.62)
+            translateY(30px);
+    }
+
+    to{
+        opacity:1;
+        transform:
+            scale(1)
+            translateY(0);
+    }
+
+}
+
+.win-icon{
+
+    font-size:62px;
+
+    animation:
+        trophy 1s infinite alternate;
+}
+
+@keyframes trophy{
+
+    from{
+        transform:
+            rotate(-5deg)
+            scale(1);
+    }
+
+    to{
+        transform:
+            rotate(5deg)
+            scale(1.08);
+    }
+
+}
+
+.win-box h2{
+
+    font-size:34px;
+
+    margin:10px 0;
+
+    background:
+        linear-gradient(
+            90deg,
+            #ffd66a,
+            #ff8d60
+        );
+
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.win-box p{
+
+    color:#aeb9d6;
+
+    line-height:1.8;
+
+    margin-bottom:20px;
+}
+
+.win-box button{
+
+    border:none;
+
+    border-radius:12px;
+
+    padding:12px 22px;
+
+    color:white;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    background:
+        linear-gradient(
+            135deg,
+            #7567ff,
+            #5148dc
+        );
+
+    transition:.2s;
+}
+
+.win-box button:hover{
+
+    transform:translateY(-2px);
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media(max-width:900px){
+
+    #gameScreen{
+
+        padding:
+            12px
+            10px
+            28px;
+    }
+
+    .game-top{
+
+        grid-template-columns:
+            100px
+            1fr
+            100px;
+
+        min-height:72px;
+
+        gap:8px;
+    }
+
+    .controls button{
+
+        width:80px;
+
+        height:28px;
+
+        font-size:8px;
+    }
+
+    .stat{
+
+        width:82px;
+
+        height:28px;
+
+        padding:0 6px;
+    }
+
+    .stat span{
+        font-size:5px;
+    }
+
+    .stat strong{
+        font-size:9px;
+    }
+
+    .vertical-progress{
+
+        left:7px;
+
+        top:115px;
+    }
+
+    .vertical-progress-bar{
+
+        width:7px;
+
+        height:150px;
+    }
+
+    .message{
+
+        width:65%;
+
+        margin-top:6px;
+    }
+
+    .game{
+
+        width:
+            calc(100% - 40px);
+
+        gap:12px;
+    }
+
+    .tower{
+
+        height:330px;
+
+        flex-basis:31%;
+    }
+
+    .pole{
+
+        height:225px;
+
+        bottom:43px;
+    }
+
+    .base{
+
+        bottom:24px;
+
+        height:18px;
+    }
+
+    .disks{
+
+        bottom:43px;
+
+        height:225px;
+    }
+
+    .disk{
+        height:22px;
+    }
+
+    .tower-name{
+        font-size:9px;
+    }
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media(max-width:600px){
+
+    .new-box{
+
+        padding:
+            28px
+            18px;
+    }
+
+    .new-box h1{
+
+        font-size:34px;
+
+        margin-bottom:18px;
+    }
+
+    .features{
+
+        grid-template-columns:
+            repeat(2,1fr);
+    }
+
+    .game-top{
+
+        grid-template-columns:
+            90px
+            1fr
+            90px;
+
+        min-height:65px;
+    }
+
+    .controls button{
+
+        width:72px;
+
+        height:26px;
+
+        font-size:7px;
+    }
+
+    .stat{
+
+        width:72px;
+
+        height:26px;
+    }
+
+    .stat span{
+        font-size:4.5px;
+    }
+
+    .stat strong{
+        font-size:8px;
+    }
+
+    .vertical-progress{
+        display:none;
+    }
+
+    .message{
+
+        width:75%;
+
+        font-size:10px;
+    }
+
+    .game{
+
+        width:100%;
+
+        gap:5px;
+
+        padding:
+            5px
+            0
+            25px;
+    }
+
+    .tower{
+
+        height:295px;
+
+        border-radius:14px;
+
+        flex-basis:32%;
+    }
+
+    .pole{
+
+        height:198px;
+
+        width:7px;
+
+        bottom:42px;
+    }
+
+    .base{
+
+        bottom:24px;
+
+        height:16px;
+    }
+
+    .disks{
+
+        bottom:42px;
+
+        height:198px;
+    }
+
+    .disk{
+
+        height:20px;
+
+        border-width:1px;
+    }
+
+    .tower-name{
+
+        top:10px;
+
+        font-size:8px;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     NEW GAME SCREEN
+===================================================== -->
+
+<div
+    id="newGameScreen"
+    class="screen active"
+>
+
+    <div class="new-box">
+
+        <h1>
+            ⚡ TOWER OF HANOI
+        </h1>
+
+
+        <div class="disk-select">
+
+            <label for="diskCount">
+                Number of Disks
+            </label>
+
+            <select id="diskCount">
+
+                <option value="1">
+                    1 Disk
+                </option>
+
+                <option value="2">
+                    2 Disks
+                </option>
+
+                <option value="3" selected>
+                    3 Disks
+                </option>
+
+                <option value="4">
+                    4 Disks
+                </option>
+
+                <option value="5">
+                    5 Disks
+                </option>
+
+                <option value="6">
+                    6 Disks
+                </option>
+
+                <option value="7">
+                    7 Disks
+                </option>
+
+                <option value="8">
+                    8 Disks
+                </option>
+
+                <option value="9">
+                    9 Disks
+                </option>
+
+                <option value="10">
+                    10 Disks
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <button
+            class="start-btn"
+            id="startButton"
+        >
+            🚀 START GAME
+        </button>
+
+
+        <div class="description">
+
+            Challenge your mind and solve the classic
+            Tower of Hanoi puzzle. Use strategy,
+            precision and the fewest moves possible.
+
+        </div>
+
+
+        <div class="features">
+
+            <div class="feature">
+
+                <div class="feature-icon">
+                    🧠
+                </div>
+
+                <div class="feature-text">
+                    Strategy
+                </div>
+
+            </div>
+
+
+            <div class="feature">
+
+                <div class="feature-icon">
+                    ⚡
+                </div>
+
+                <div class="feature-text">
+                    Speed
+                </div>
+
+            </div>
+
+
+            <div class="feature">
+
+                <div class="feature-icon">
+                    🎯
+                </div>
+
+                <div class="feature-text">
+                    Precision
+                </div>
+
+            </div>
+
+
+            <div class="feature">
+
+                <div class="feature-icon">
+                    🏆
+                </div>
+
+                <div class="feature-text">
+                    Mastery
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     GAME SCREEN
+===================================================== -->
+
+<div
+    id="gameScreen"
+    class="screen"
+>
+
+
+    <div class="game-top">
+
+
+        <!-- LEFT -->
+
+        <div class="controls">
+
+            <button
+                class="new-game-btn"
+                id="newGameButton"
+            >
+                🎮 New Game
+            </button>
+
+            <button
+                class="reset-btn"
+                id="resetButton"
+            >
+                ↻ Reset
+            </button>
+
+        </div>
+
+
+        <!-- CENTER EMPTY -->
+
+        <div></div>
+
+
+        <!-- RIGHT -->
+
+        <div class="stats">
+
+            <div class="stat">
+
+                <span>
+                    TIME
+                </span>
+
+                <strong id="timer">
+                    00:00
+                </strong>
+
+            </div>
+
+
+            <div class="stat">
+
+                <span>
+                    MOVES
+                </span>
+
+                <strong id="moves">
+                    00
+                </strong>
+
+            </div>
+
+
+            <div class="stat">
+
+                <span>
+                    MINIMUM
+                </span>
+
+                <strong id="minimum">
+                    07
+                </strong>
+
+            </div>
+
+
+            <div class="stat">
+
+                <span>
+                    PROGRESS
+                </span>
+
+                <strong id="scorePercent">
+                    00%
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- VERTICAL PROGRESS -->
+
+    <div class="vertical-progress">
+
+        <div class="vertical-progress-bar">
+
+            <div
+                class="vertical-progress-fill"
+                id="progress"
+            ></div>
+
+        </div>
+
+        <span id="verticalPercent">
+            00%
+        </span>
+
+    </div>
+
+
+    <!-- MESSAGE -->
+
+    <div
+        class="message"
+        id="message"
+    >
+        Select the top disk from Tower A.
+    </div>
+
+
+    <!-- TOWERS -->
+
+    <div class="game">
+
+
+        <div
+            class="tower"
+            id="tower0"
+        >
+
+            <div class="tower-name">
+                TOWER A
+            </div>
+
+            <div class="pole"></div>
+
+            <div class="base"></div>
+
+            <div class="disks"></div>
+
+        </div>
+
+
+        <div
+            class="tower"
+            id="tower1"
+        >
+
+            <div class="tower-name">
+                TOWER B
+            </div>
+
+            <div class="pole"></div>
+
+            <div class="base"></div>
+
+            <div class="disks"></div>
+
+        </div>
+
+
+        <div
+            class="tower"
+            id="tower2"
+        >
+
+            <div class="tower-name">
+                TOWER C
+            </div>
+
+            <div class="pole"></div>
+
+            <div class="base"></div>
+
+            <div class="disks"></div>
+
+        </div>
+
+    </div>
+
+
+    <footer>
+
+        🧠 Smaller disks must always stay above larger disks.
+
+    </footer>
+
+</div>
+
+
+<!-- =====================================================
+     WIN SCREEN
+===================================================== -->
+
+<div
+    class="overlay"
+    id="winOverlay"
+>
+
+    <div class="win-box">
+
+        <div class="win-icon">
+            🏆
+        </div>
+
+        <h2>
+            You Won!
+        </h2>
+
+        <p id="winText"></p>
+
+        <button id="playAgainButton">
+            🎮 New Game
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+let towers = [
+    [],
+    [],
+    []
+];
+
+let diskCount = 3;
+
+let selectedTower = null;
+
+let selectedDisk = null;
+
+let moves = 0;
+
+let seconds = 0;
+
+let timerInterval = null;
+
+let gameStarted = false;
+
+
+/* =====================================================
+   ELEMENTS
+===================================================== */
+
+const newGameScreen =
+    document.getElementById(
+        "newGameScreen"
+    );
+
+const gameScreen =
+    document.getElementById(
+        "gameScreen"
+    );
+
+const diskCountSelect =
+    document.getElementById(
+        "diskCount"
+    );
+
+const startButton =
+    document.getElementById(
+        "startButton"
+    );
+
+const newGameButton =
+    document.getElementById(
+        "newGameButton"
+    );
+
+const resetButton =
+    document.getElementById(
+        "resetButton"
+    );
+
+const playAgainButton =
+    document.getElementById(
+        "playAgainButton"
+    );
+
+const winOverlay =
+    document.getElementById(
+        "winOverlay"
+    );
+
+
+/* =====================================================
+   BUTTON EVENTS
+===================================================== */
+
+startButton.addEventListener(
+    "click",
+    startGame
+);
+
+newGameButton.addEventListener(
+    "click",
+    openNewGame
+);
+
+resetButton.addEventListener(
+    "click",
+    resetGame
+);
+
+playAgainButton.addEventListener(
+    "click",
+    function(){
+
+        winOverlay.classList.remove(
+            "show"
+        );
+
+        openNewGame();
+
+    }
+);
+
+
+/* =====================================================
+   TOWER EVENTS
+===================================================== */
+
+document
+    .getElementById("tower0")
+    .addEventListener(
+        "click",
+        function(){
+
+            towerClick(0);
+
+        }
+    );
+
+document
+    .getElementById("tower1")
+    .addEventListener(
+        "click",
+        function(){
+
+            towerClick(1);
+
+        }
+    );
+
+document
+    .getElementById("tower2")
+    .addEventListener(
+        "click",
+        function(){
+
+            towerClick(2);
+
+        }
+    );
+
+
+/* =====================================================
+   OPEN NEW GAME
+===================================================== */
+
+function openNewGame(){
+
+    stopTimer();
+
+    gameScreen.classList.remove(
+        "active"
+    );
+
+    newGameScreen.classList.add(
+        "active"
+    );
+}
+
+
+/* =====================================================
+   START GAME
+===================================================== */
+
+function startGame(){
+
+    diskCount =
+        Number(
+            diskCountSelect.value
+        );
+
+
+    towers = [
+        [],
+        [],
+        []
+    ];
+
+
+    selectedTower = null;
+
+    selectedDisk = null;
+
+    moves = 0;
+
+    seconds = 0;
+
+    gameStarted = false;
+
+    stopTimer();
+
+
+    for(
+        let i = diskCount;
+        i >= 1;
+        i--
+    ){
+
+        towers[0].push(i);
+
+    }
+
+
+    newGameScreen.classList.remove(
+        "active"
+    );
+
+    gameScreen.classList.add(
+        "active"
+    );
+
+    winOverlay.classList.remove(
+        "show"
+    );
+
+
+    updateMinimum();
+
+    updateStats();
+
+    render();
+
+
+    setMessage(
+        "Select the top disk from Tower A."
+    );
+}
+
+
+/* =====================================================
+   RESET
+===================================================== */
+
+function resetGame(){
+
+    startGame();
+
+    setMessage(
+        "↻ Game reset! Start again from Tower A."
+    );
+}
+
+
+/* =====================================================
+   TIMER
+===================================================== */
+
+function startTimer(){
+
+    if(gameStarted){
+        return;
+    }
+
+
+    gameStarted = true;
+
+
+    timerInterval =
+        setInterval(
+            function(){
+
+                seconds++;
+
+                updateTimer();
+
+            },
+            1000
+        );
+}
+
+
+function stopTimer(){
+
+    if(
+        timerInterval !== null
+    ){
+
+        clearInterval(
+            timerInterval
+        );
+
+        timerInterval = null;
+    }
+}
+
+
+function updateTimer(){
+
+    const minutes =
+        Math.floor(
+            seconds / 60
+        );
+
+    const secs =
+        seconds % 60;
+
+
+    document
+        .getElementById("timer")
+        .textContent =
+            String(minutes)
+                .padStart(2,"0")
+            +
+            ":"
+            +
+            String(secs)
+                .padStart(2,"0");
+}
+
+
+/* =====================================================
+   MINIMUM
+===================================================== */
+
+function updateMinimum(){
+
+    const minimum =
+        Math.pow(
+            2,
+            diskCount
+        ) - 1;
+
+
+    document
+        .getElementById("minimum")
+        .textContent =
+            String(minimum)
+                .padStart(2,"0");
+}
+
+
+/* =====================================================
+   TOWER CLICK
+===================================================== */
+
+function towerClick(index){
+
+
+    /* SELECT */
+
+    if(
+        selectedTower === null
+    ){
+
+        if(
+            towers[index].length === 0
+        ){
+
+            setMessage(
+                "This tower is empty."
+            );
+
+            return;
+        }
+
+
+        selectedTower = index;
+
+
+        selectedDisk =
+            towers[index][
+                towers[index].length - 1
+            ];
+
+
+        document
+            .getElementById(
+                "tower" + index
+            )
+            .classList.add(
+                "selected"
+            );
+
+
+        setMessage(
+            "Disk "
+            +
+            selectedDisk
+            +
+            " selected. Choose a destination tower."
+        );
+
+
+        render();
+
+        return;
+    }
+
+
+    /* CANCEL */
+
+    if(
+        selectedTower === index
+    ){
+
+        clearSelection();
+
+        setMessage(
+            "Selection cancelled."
+        );
+
+        render();
+
+        return;
+    }
+
+
+    /* MOVE */
+
+    moveDisk(
+        selectedTower,
+        index
+    );
+}
+
+
+/* =====================================================
+   MOVE
+===================================================== */
+
+function moveDisk(from,to){
+
+    const source =
+        towers[from];
+
+    const destination =
+        towers[to];
+
+
+    const disk =
+        source[
+            source.length - 1
+        ];
+
+
+    if(
+        destination.length > 0
+        &&
+        destination[
+            destination.length - 1
+        ] < disk
+    ){
+
+        setMessage(
+            "❌ Illegal move! Larger disk cannot go on smaller disk."
+        );
+
+        return;
+    }
+
+
+    startTimer();
+
+
+    source.pop();
+
+    destination.push(
+        disk
+    );
+
+
+    moves++;
+
+
+    clearSelection();
+
+    render();
+
+    updateStats();
+
+
+    if(
+        towers[2].length === diskCount
+    ){
+
+        stopTimer();
+
+
+        setTimeout(
+            showWin,
+            350
+        );
+
+
+        return;
+    }
+
+
+    setMessage(
+        "✓ Good move! Select the next disk."
+    );
+}
+
+
+/* =====================================================
+   CLEAR SELECTION
+===================================================== */
+
+function clearSelection(){
+
+    selectedTower = null;
+
+    selectedDisk = null;
+
+
+    document
+        .querySelectorAll(".tower")
+        .forEach(
+            function(tower){
+
+                tower.classList.remove(
+                    "selected"
+                );
+
+            }
+        );
+}
+
+
+/* =====================================================
+   RING SIZE CALCULATION
+===================================================== */
+
+function getRingWidths(){
+
+    const tower =
+        document.querySelector(
+            ".tower"
+        );
+
+
+    const towerWidth =
+        tower
+        ?
+        tower.clientWidth
+        :
+        360;
+
+
+    /*
+        5 RINGS IS THE BASE SIZE.
+
+        5 rings:
+        smallest = 82px
+        largest  = 165px
+    */
+
+    const baseMin = 82;
+
+    const baseMax = 165;
+
+
+    let minWidth;
+
+    let maxWidth;
+
+
+    /* 1 RING */
+
+    if(
+        diskCount === 1
+    ){
+
+        minWidth = 110;
+
+        maxWidth = 110;
+
+    }
+
+
+    /* 2 RINGS */
+
+    else if(
+        diskCount === 2
+    ){
+
+        minWidth = 95;
+
+        maxWidth = 145;
+
+    }
+
+
+    /* 3 RINGS */
+
+    else if(
+        diskCount === 3
+    ){
+
+        minWidth = 90;
+
+        maxWidth = 155;
+
+    }
+
+
+    /* 4 RINGS */
+
+    else if(
+        diskCount === 4
+    ){
+
+        minWidth = 86;
+
+        maxWidth = 160;
+
+    }
+
+
+    /* 5 RINGS - PERFECT BASE */
+
+    else if(
+        diskCount === 5
+    ){
+
+        minWidth =
+            baseMin;
+
+        maxWidth =
+            baseMax;
+
+    }
+
+
+    /* 6 RINGS */
+
+    else if(
+        diskCount === 6
+    ){
+
+        minWidth = 80;
+
+        maxWidth = 180;
+
+    }
+
+
+    /* 7 RINGS */
+
+    else if(
+        diskCount === 7
+    ){
+
+        minWidth = 78;
+
+        maxWidth = 195;
+
+    }
+
+
+    /* 8 RINGS */
+
+    else if(
+        diskCount === 8
+    ){
+
+        minWidth = 77;
+
+        maxWidth = 215;
+
+    }
+
+
+    /* 9 RINGS */
+
+    else if(
+        diskCount === 9
+    ){
+
+        minWidth = 76;
+
+        maxWidth = 240;
+
+    }
+
+
+    /* 10 RINGS */
+
+    else if(
+        diskCount === 10
+    ){
+
+        /*
+            Smallest ≈ 2 cm
+            Largest  ≈ 7 cm
+
+            1cm ≈ 37.8px
+        */
+
+        minWidth = 75.6;
+
+        maxWidth = 264.6;
+
+    }
+
+
+    /*
+        Maximum ring width.
+
+        Ring tower ke bahar nahi jayegi.
+    */
+
+    const maxAllowed =
+        towerWidth * 0.58;
+
+
+    maxWidth =
+        Math.min(
+            maxWidth,
+            maxAllowed
+        );
+
+
+    /*
+        Fixed sizes generate karo.
+    */
+
+    const widths = [];
+
+
+    for(
+        let size = 1;
+        size <= diskCount;
+        size++
+    ){
+
+        const ratio =
+            diskCount === 1
+            ?
+            1
+            :
+            (
+                (size - 1)
+                /
+                (diskCount - 1)
+            );
+
+
+        const width =
+            minWidth
+            +
+            ratio *
+            (
+                maxWidth
+                -
+                minWidth
+            );
+
+
+        widths.push(
+            width
+        );
+    }
+
+
+    return widths;
+}
+
+
+/* =====================================================
+   RENDER
+===================================================== */
+
+function render(){
+
+    const widths =
+        getRingWidths();
+
+
+    for(
+        let i = 0;
+        i < 3;
+        i++
+    ){
+
+        const container =
+            document.querySelector(
+                "#tower"
+                +
+                i
+                +
+                " .disks"
+            );
+
+
+        container.innerHTML = "";
+
+
+        for(
+            let j = 0;
+            j < towers[i].length;
+            j++
+        ){
+
+            const size =
+                towers[i][j];
+
+
+            const disk =
+                document.createElement(
+                    "div"
+                );
+
+
+            disk.className =
+                "disk";
+
+
+            disk.dataset.size =
+                size;
+
+
+            /*
+                Ring size is fixed
+                according to selected
+                number of rings.
+            */
+
+            disk.style.width =
+                widths[
+                    size - 1
+                ]
+                +
+                "px";
+
+
+            if(
+                selectedTower === i
+                &&
+                j ===
+                towers[i].length - 1
+            ){
+
+                disk.classList.add(
+                    "selected"
+                );
+            }
+
+
+            container.appendChild(
+                disk
+            );
+        }
+    }
+}
+
+
+/* =====================================================
+   STATS
+===================================================== */
+
+function updateStats(){
+
+    document
+        .getElementById("moves")
+        .textContent =
+            String(moves)
+                .padStart(2,"0");
+
+
+    const completed =
+        towers[2].length;
+
+
+    const percentage =
+        Math.round(
+            completed
+            /
+            diskCount
+            *
+            100
+        );
+
+
+    document
+        .getElementById(
+            "scorePercent"
+        )
+        .textContent =
+            String(percentage)
+                .padStart(2,"0")
+            +
+            "%";
+
+
+    document
+        .getElementById(
+            "verticalPercent"
+        )
+        .textContent =
+            String(percentage)
+                .padStart(2,"0")
+            +
+            "%";
+
+
+    document
+        .getElementById(
+            "progress"
+        )
+        .style.height =
+            percentage
+            +
+            "%";
+
+
+    updateTimer();
+}
+
+
+/* =====================================================
+   MESSAGE
+===================================================== */
+
+function setMessage(text){
+
+    const message =
+        document.getElementById(
+            "message"
+        );
+
+
+    message.style.opacity =
+        "0";
+
+
+    setTimeout(
+        function(){
+
+            message.textContent =
+                text;
+
+            message.style.opacity =
+                "1";
+
+        },
+        80
+    );
+}
+
+
+/* =====================================================
+   WIN
+===================================================== */
+
+function showWin(){
+
+    const minimum =
+        Math.pow(
+            2,
+            diskCount
+        ) - 1;
+
+
+    const efficiency =
+        moves === 0
+        ?
+        100
+        :
+        Math.round(
+            minimum
+            /
+            moves
+            *
+            100
+        );
+
+
+    let result;
+
+
+    if(
+        moves === minimum
+    ){
+
+        result =
+            "🔥 Perfect! Minimum possible moves!";
+
+    }
+    else{
+
+        result =
+            "🎉 You solved it in "
+            +
+            moves
+            +
+            " moves. Minimum was "
+            +
+            minimum
+            +
+            ".";
+
+    }
+
+
+    document
+        .getElementById(
+            "winText"
+        )
+        .innerHTML =
+
+            result
+            +
+            "<br><br>"
+            +
+            "⏱️ Time: "
+            +
+            formatTime(seconds)
+            +
+            "<br>"
+            +
+            "🎯 Efficiency: "
+            +
+            efficiency
+            +
+            "%";
+
+
+    winOverlay.classList.add(
+        "show"
+    );
+}
+
+
+/* =====================================================
+   FORMAT TIME
+===================================================== */
+
+function formatTime(total){
+
+    const minutes =
+        Math.floor(
+            total / 60
+        );
+
+
+    const secs =
+        total % 60;
+
+
+    return(
+
+        String(minutes)
+            .padStart(2,"0")
+
+        +
+
+        ":"
+
+        +
+
+        String(secs)
+            .padStart(2,"0")
+
+    );
+}
+
+
+/* =====================================================
+   RESIZE
+===================================================== */
+
+window.addEventListener(
+    "resize",
+    function(){
+
+        if(
+            gameScreen.classList.contains(
+                "active"
+            )
+        ){
+
+            render();
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   INITIAL
+===================================================== */
+
+updateMinimum();
+
+</script>
+
+</body>
+</html>
