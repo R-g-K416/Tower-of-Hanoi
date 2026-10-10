@@ -1,18 +1,16 @@
 {
   "name": "Tower of Hanoi - Ramgopal",
-  "short_name": "Hanoi",
-  "description": "Classic Tower of Hanoi puzzle game by Ramgopal Kumawat",
+  "short_name": "Hanoi Game",
+  "description": "Classic Tower of Hanoi puzzle game made by Ramgopal Kumawat. Move disks to solve the puzzle.",
   "start_url": "https://r-g-k416.github.io/Tower-of-Hanoi/",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#0f172a",
   "theme_color": "#4f46e5",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/566/566985.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
